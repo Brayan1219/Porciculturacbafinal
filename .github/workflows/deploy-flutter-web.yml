@@ -1,0 +1,35 @@
+name: Deploy Flutter Web to Firebase Hosting
+
+on:
+  push:
+    branches:
+      - main # Asegúrate de que esta sea la rama donde haces tus cambios principales (ej. master, develop)
+  workflow_dispatch: # Esto te permite ejecutar el workflow manualmente desde GitHub
+
+jobs:
+  build_and_deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+
+      - name: Get Flutter dependencies
+        run: flutter pub get
+
+      - name: Build Flutter Web
+        run: flutter build web --release # Construye la versión de lanzamiento para producción
+
+      - name: Deploy to Firebase Hosting
+        uses: FirebaseExtended/action-hosting-deploy@v0 # Acción oficial de Firebase para despliegue
+        with:
+          repoToken: '${{ secrets.GITHUB_TOKEN }}'
+          firebaseServiceAccount: '${{ secrets.FIREBASE_SERVICE_ACCOUNT_PORCICULTURA_95EBB }}' # ¡Este es el secreto que acabas de crear!
+          projectId: 'porcicultura-95ebb' # Tu ID de proyecto de Firebase
+          channelId: live # Despliega en el canal "live"
+          # target: your-hosting-target # Descomenta y ajusta si tienes múltiples sitios de hosting
+          entryPoint: ./ # La raíz de tu proyecto donde está firebase.json
